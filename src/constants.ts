@@ -51,6 +51,9 @@ const bankData: BankData[] = [
         [7350, 7399],
       ],
 
+      // IRD document doesn't actually specify an algorithm because of their poorly formatted table
+      "04": [[2020, 2024]],
+
       10: [[5165, 5169]],
 
       "06": [
@@ -140,7 +143,6 @@ const bankData: BankData[] = [
   {
     key: "X",
     branches: {
-      "04": [[2020, 2024]],
       31: [[2800, 2849]],
     },
   },

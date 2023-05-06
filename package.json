@@ -1,6 +1,6 @@
 {
   "name": "nz-bank-validator",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A small, zero dependency NZ bank account validation library that runs everywhere.",
   "source": "src/index.ts",
   "type": "module",
@@ -17,15 +17,19 @@
     "lint": "eslint ./src/**/*.ts",
     "build": "microbundle",
     "watch": "microbundle watch",
-    "start": "microbundle watch"
+    "start": "microbundle watch",
+    "test": "jest"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.1",
     "@typescript-eslint/eslint-plugin": "^5.59.2",
     "@typescript-eslint/parser": "^5.59.2",
     "eslint": "^8.40.0",
     "eslint-plugin-import": "^2.27.5",
+    "jest": "^29.5.0",
     "microbundle": "^0.15.1",
     "prettier": "^2.8.8",
+    "ts-jest": "^29.1.0",
     "typescript": "^5.0.4"
   },
   "eslintConfig": {
@@ -33,10 +37,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rmcdgl/NZ-Bank-Account-Validator.git"
+    "url": "https://github.com/rmcdgl/NZ-Bank-Validator.git"
   },
   "bugs": {
-    "url": "https://github.com/rmcdgl/NZ-Bank-Account-Validator/issues"
+    "url": "https://github.com/rmcdgl/NZ-Bank-Validator/issues"
   },
   "keywords": [
     "Bank",
