@@ -1,6 +1,6 @@
 {
   "name": "nz-bank-validator",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A small, zero dependency NZ bank account validation library that runs everywhere.",
   "source": "src/index.ts",
   "type": "module",
@@ -18,7 +18,8 @@
     "build": "microbundle",
     "watch": "microbundle watch",
     "start": "microbundle watch",
-    "test": "jest"
+    "test": "jest",
+    "publish": "npm run build && npm publish"
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
