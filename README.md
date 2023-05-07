@@ -1,6 +1,6 @@
 # NZ Bank Validator
 
-v0.0.5 - A small, zero dependency Javascript NZ bank account validation library that runs everywhere.
+A small, zero dependency Javascript NZ bank account validation library that runs everywhere.
 
 It is based on the [2020 documentation](https://www.ird.govt.nz/-/media/project/ir/home/documents/income-tax/withholding-taxes/rwt-nrwt-withholding-tax-certificate/2020-rwt-and-nrwt-certificate-filing-specification.pdf) provided by the Inland Revenue Department.
 This library is not however affiliated with or endorsed by the IRD.
