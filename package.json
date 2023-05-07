@@ -1,15 +1,15 @@
 {
   "name": "nz-bank-validator",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A small, zero dependency NZ bank account validation library that runs everywhere.",
   "source": "src/index.ts",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "umd:main": "dist/index.umd.js",
   "module": "dist/index.mjs",
   "exports": {
     "types": "./dist/index.d.ts",
-    "require": "./dist/index.js",
+    "require": "./dist/index.cjs",
     "default": "./dist/index.modern.mjs"
   },
   "types": "dist/index.d.ts",
@@ -19,7 +19,7 @@
     "watch": "microbundle watch",
     "start": "microbundle watch",
     "test": "jest",
-    "publish": "npm run build && npm publish"
+    "pub": "npm run build && npm publish"
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
