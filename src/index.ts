@@ -40,15 +40,6 @@ const bankAccountValidator = {
     return this.getPartsObject(input).suffix;
   },
 
-  isPartsObject(obj: unknown = {}): obj is PartsObject {
-    if (typeof obj !== "object" || obj === null) return false;
-    const inputsKeys = Object.keys(obj);
-    const requiredKeys = Object.keys(partConstants);
-    const filteredKeys = requiredKeys.filter((k) => inputsKeys.includes(k));
-
-    return requiredKeys.length === filteredKeys.length;
-  },
-
   splitString(str = ""): string[] {
     const parts = isString(str) ? str.split(/[^0-9]/) : [];
 
