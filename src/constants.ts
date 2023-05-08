@@ -40,6 +40,7 @@ const bankData: BankData[] = [
       "02": [
         [1, 999],
         [1200, 1299],
+        [2025, 2055], // see https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/
       ],
 
       "03": [
@@ -52,7 +53,7 @@ const bankData: BankData[] = [
       ],
 
       // IRD document doesn't actually specify an algorithm because of their poorly formatted table
-      "04": [[2020, 2024]],
+      "04": [[2014, 2024]], // Lower bound from https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/
 
       10: [[5165, 5169]],
 
@@ -143,7 +144,9 @@ const bankData: BankData[] = [
   {
     key: "X",
     branches: {
+      "05": [[8884, 8889]], // China Construction Bank, see https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/
       31: [[2800, 2849]],
+      88: [[8800, 8805]], // Bank of China, see https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/
     },
   },
 ];

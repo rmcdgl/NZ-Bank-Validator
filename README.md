@@ -2,8 +2,7 @@
 
 A small, zero dependency Javascript NZ bank account validation library that runs everywhere.
 
-It is based on the [2020 documentation](https://www.ird.govt.nz/-/media/project/ir/home/documents/income-tax/withholding-taxes/rwt-nrwt-withholding-tax-certificate/2020-rwt-and-nrwt-certificate-filing-specification.pdf) provided by the Inland Revenue Department.
-This library is not however affiliated with or endorsed by the IRD.
+It is based on the [2020 documentation](https://www.ird.govt.nz/-/media/project/ir/home/documents/income-tax/withholding-taxes/rwt-nrwt-withholding-tax-certificate/2020-rwt-and-nrwt-certificate-filing-specification.pdf) and the [PaymentsNZ Bank Branch Register](https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/) which includes a number of branches not included in the IRD's specs. These have no validation applied other than the checking the branch number is within the published range.
 
 Forked from [Josh Hollinshead](https://github.com/kiwi-josh)'s [`nz-bank-account-validator`](https://github.com/kiwi-josh/NZ-Bank-Account-Validator).
 The project was converted to Typescript and updated to the 2020 spec from the 2016 spec without any changes to the API.
