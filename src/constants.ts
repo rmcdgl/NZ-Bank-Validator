@@ -27,6 +27,7 @@ const partMaxLengths: PartMaxLengths = {
   suffix: 4,
 };
 
+// The ranges used for branches are inclusive
 const bankData: BankData[] = [
   {
     key: "AB",
@@ -35,12 +36,13 @@ const bankData: BankData[] = [
         [1, 999],
         [1100, 1199],
         [1800, 1899],
+        [6150, 6150],
       ],
 
       "02": [
         [1, 999],
         [1200, 1299],
-        [2025, 2055], // see https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/
+        [2025, 2055],
       ],
 
       "03": [
@@ -52,15 +54,16 @@ const bankData: BankData[] = [
         [7350, 7399],
       ],
 
-      // IRD document doesn't actually specify an algorithm because of their poorly formatted table
       "04": [[2014, 2024]], // Lower bound from https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/
 
-      10: [[5165, 5169]],
+      "05": [[8884, 8889]], // China Construction Bank, see https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/
 
       "06": [
         [1, 999],
         [1400, 1499],
       ],
+
+      10: [[5165, 5169]],
 
       11: [
         [5000, 6499],
@@ -104,6 +107,8 @@ const bankData: BankData[] = [
       35: [[2400, 2499]],
 
       38: [[9000, 9499]],
+
+      88: [[8800, 8805]], // Bank of China, see https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/
     },
   },
 
@@ -115,38 +120,16 @@ const bankData: BankData[] = [
   },
 
   {
-    key: "E",
-    branches: {
-      "09": [[0, 0]],
-    },
-  },
-
-  {
     key: "F",
     branches: {
       25: [[2500, 2599]],
-
-      33: [[6700, 6799]],
-    },
-  },
-
-  {
-    key: "G",
-    branches: {
-      26: [[2600, 2699]],
-
-      28: [[2100, 2149]],
-
-      29: [[2150, 2299]],
     },
   },
 
   {
     key: "X",
     branches: {
-      "05": [[8884, 8889]], // China Construction Bank, see https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/
       31: [[2800, 2849]],
-      88: [[8800, 8805]], // Bank of China, see https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/
     },
   },
 ];

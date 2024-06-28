@@ -10,7 +10,6 @@ const validateTests: [string, any, boolean][] = [
   ],
   ["Algorithm A test (No delimiters)", "01902006838900", true],
   ["Algorithm D test", "08-6523-1954512-001", true],
-  ["Algorithm G test", "26-2600-0320871-032", true],
   ["Random test 1", "12-3140-0171323-50", true],
   ["Random test 2", "12-3141-325080-00", true],
   ["ANZ institutional (added in 2020 spec)", "04-2021-0095861-15", true],
