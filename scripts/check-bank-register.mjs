@@ -1,5 +1,12 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from "node:fs";
+import { basename, join } from "node:path";
 import { loadBankData } from "./lib/load-bank-data.mjs";
 
 const DEFAULT_REGISTER_URL =
@@ -12,6 +19,8 @@ function parseArgs(argv) {
     file: undefined,
     fix: false,
     report: undefined,
+    snapshotDir: undefined,
+    snapshotIndex: undefined,
     url: DEFAULT_REGISTER_URL,
   };
 
@@ -24,6 +33,10 @@ function parseArgs(argv) {
       options.fix = true;
     } else if (arg === "--report") {
       options.report = argv[++index];
+    } else if (arg === "--snapshot-dir") {
+      options.snapshotDir = argv[++index];
+    } else if (arg === "--snapshot-index") {
+      options.snapshotIndex = argv[++index];
     } else if (arg === "--url") {
       options.url = argv[++index];
     } else if (arg === "--suggest-fix") {
@@ -287,7 +300,237 @@ function formatBranch(row) {
   return `${row.bankId}-${String(row.branchNumber).padStart(4, "0")}`;
 }
 
-function buildReport({ activeRows, analysis, appliedFixes, registerDate }) {
+function getBranchIds(activeRows) {
+  return Array.from(new Set(activeRows.map(formatBranch))).sort();
+}
+
+function parseSnapshotDate(value) {
+  const isoMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (isoMatch) {
+    return new Date(`${value}T00:00:00.000Z`);
+  }
+
+  const textMatch = value.match(/^(\d{1,2})\s+([A-Z][a-z]+)\s+(\d{4})$/);
+
+  if (!textMatch) {
+    return undefined;
+  }
+
+  const months = {
+    January: 0,
+    February: 1,
+    March: 2,
+    April: 3,
+    May: 4,
+    June: 5,
+    July: 6,
+    August: 7,
+    September: 8,
+    October: 9,
+    November: 10,
+    December: 11,
+  };
+  const [, day, month, year] = textMatch;
+  const monthIndex = months[month];
+
+  if (monthIndex === undefined) {
+    return undefined;
+  }
+
+  return new Date(Date.UTC(Number(year), monthIndex, Number(day)));
+}
+
+function toDateSlug(value) {
+  const parsed = parseSnapshotDate(value);
+
+  if (parsed) {
+    return parsed.toISOString().slice(0, 10);
+  }
+
+  if (value === "fixture") {
+    return "fixture";
+  }
+
+  return new Date().toISOString().slice(0, 10);
+}
+
+function readSnapshot(filePath) {
+  const branches = readFileSync(filePath, "utf8")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("#"));
+
+  return {
+    branches,
+    file: filePath,
+    name: basename(filePath),
+    slug: basename(filePath, ".txt"),
+  };
+}
+
+function diffBranches(currentBranches, previousBranches) {
+  const current = new Set(currentBranches);
+  const previous = new Set(previousBranches);
+
+  return {
+    added: currentBranches.filter((branch) => !previous.has(branch)),
+    removed: previousBranches.filter((branch) => !current.has(branch)),
+  };
+}
+
+function findPreviousSnapshot(snapshotDir, currentSlug) {
+  if (!existsSync(snapshotDir)) {
+    return undefined;
+  }
+
+  const snapshots = readdirSync(snapshotDir)
+    .filter((file) => file.endsWith(".txt"))
+    .map((file) => basename(file, ".txt"))
+    .filter((slug) => slug !== currentSlug)
+    .sort();
+
+  const earlierSnapshots = snapshots.filter((slug) => slug < currentSlug);
+  const previousSlug =
+    earlierSnapshots[earlierSnapshots.length - 1] ?? snapshots[snapshots.length - 1];
+
+  if (!previousSlug) {
+    return undefined;
+  }
+
+  return readSnapshot(join(snapshotDir, `${previousSlug}.txt`));
+}
+
+function findSnapshotAtLeastMonthsOld(snapshotDir, currentSlug, monthsBack) {
+  const currentDate = parseSnapshotDate(currentSlug);
+
+  if (!currentDate || !existsSync(snapshotDir)) {
+    return undefined;
+  }
+
+  const threshold = new Date(currentDate);
+  threshold.setUTCMonth(threshold.getUTCMonth() - monthsBack);
+
+  const candidates = readdirSync(snapshotDir)
+    .filter((file) => file.endsWith(".txt"))
+    .map((file) => basename(file, ".txt"))
+    .filter((slug) => slug !== currentSlug)
+    .map((slug) => ({ date: parseSnapshotDate(slug), slug }))
+    .filter((snapshot) => snapshot.date && snapshot.date <= threshold)
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+  const candidate = candidates[candidates.length - 1];
+
+  if (!candidate) {
+    return undefined;
+  }
+
+  return readSnapshot(join(snapshotDir, `${candidate.slug}.txt`));
+}
+
+function writeSnapshotIndex(snapshotDir, snapshotIndex, currentSnapshot) {
+  const snapshots = readdirSync(snapshotDir)
+    .filter((file) => file.endsWith(".txt"))
+    .sort()
+    .map((file) => {
+      const snapshot = readSnapshot(join(snapshotDir, file));
+
+      return {
+        activeBranches: snapshot.branches.length,
+        file: `snapshots/${file}`,
+        registerDate: snapshot.slug,
+      };
+    });
+
+  writeFileSync(
+    snapshotIndex,
+    `${JSON.stringify(
+      {
+        updatedAt: new Date().toISOString(),
+        latest: {
+          activeBranches: currentSnapshot.branches.length,
+          file: `snapshots/${currentSnapshot.name}`,
+          registerDate: currentSnapshot.slug,
+        },
+        snapshots,
+      },
+      null,
+      2
+    )}\n`
+  );
+}
+
+function writeSnapshot({ activeRows, options, registerDate }) {
+  if (!options.snapshotDir) {
+    return undefined;
+  }
+
+  const snapshotDir = options.snapshotDir;
+  const snapshotIndex = options.snapshotIndex ?? join(snapshotDir, "..", "index.json");
+  const currentSlug = toDateSlug(registerDate);
+  const currentBranches = getBranchIds(activeRows);
+  const previousSnapshot = findPreviousSnapshot(snapshotDir, currentSlug);
+  const snapshotPath = join(snapshotDir, `${currentSlug}.txt`);
+
+  mkdirSync(snapshotDir, { recursive: true });
+
+  writeFileSync(
+    snapshotPath,
+    [
+      "# Payments NZ Bank Branch Register",
+      `# Register date: ${registerDate}`,
+      `# Retrieved at: ${new Date().toISOString()}`,
+      `# Active branches: ${currentBranches.length}`,
+      ...currentBranches,
+      "",
+    ].join("\n")
+  );
+
+  const currentSnapshot = readSnapshot(snapshotPath);
+  const comparison = previousSnapshot
+    ? {
+        ...diffBranches(currentBranches, previousSnapshot.branches),
+        previous: previousSnapshot,
+      }
+    : undefined;
+
+  const lagComparisons = [1, 3, 6, 12]
+    .map((months) => {
+      const snapshot = findSnapshotAtLeastMonthsOld(snapshotDir, currentSlug, months);
+
+      if (!snapshot) {
+        return undefined;
+      }
+
+      return {
+        months,
+        snapshot,
+        ...diffBranches(currentBranches, snapshot.branches),
+      };
+    })
+    .filter(Boolean);
+
+  writeSnapshotIndex(snapshotDir, snapshotIndex, currentSnapshot);
+
+  return { comparison, current: currentSnapshot, lagComparisons };
+}
+
+function addBranchList(lines, branches) {
+  if (branches.length === 0) {
+    lines.push("- None");
+    return;
+  }
+
+  branches.forEach((branch) => lines.push(`- ${branch}`));
+}
+
+function buildReport({
+  activeRows,
+  analysis,
+  appliedFixes,
+  registerDate,
+  snapshotReport,
+}) {
   const covered = activeRows.length - analysis.uncovered.length;
   const lines = [
     "# Payments NZ Bank Branch Register coverage report",
@@ -332,6 +575,33 @@ function buildReport({ activeRows, analysis, appliedFixes, registerDate }) {
     lines.push("");
   }
 
+  if (snapshotReport) {
+    lines.push("## Register movement", "");
+
+    if (snapshotReport.comparison) {
+      lines.push(`Compared with: ${snapshotReport.comparison.previous.slug}`, "");
+      lines.push(`Added active branches: ${snapshotReport.comparison.added.length}`, "");
+      addBranchList(lines, snapshotReport.comparison.added);
+      lines.push("");
+      lines.push(`Removed active branches: ${snapshotReport.comparison.removed.length}`, "");
+      addBranchList(lines, snapshotReport.comparison.removed);
+    } else {
+      lines.push("No previous snapshot found. This run wrote the baseline snapshot.");
+    }
+
+    lines.push("");
+  }
+
+  if (snapshotReport?.lagComparisons.length > 0) {
+    lines.push("## Update-lag simulation", "");
+    snapshotReport.lagComparisons.forEach((comparison) => {
+      lines.push(
+        `- ${comparison.months} month(s): ${comparison.added.length} active branch(es) were added since ${comparison.snapshot.slug}; ${comparison.removed.length} branch(es) were removed.`
+      );
+    });
+    lines.push("");
+  }
+
   if (analysis.warnings.length > 0) {
     lines.push("## Warnings", "");
     analysis.warnings.forEach((warning) => lines.push(`- ${warning}`));
@@ -364,6 +634,7 @@ try {
 
   let analysis = analyze(activeRows, bankData);
   let appliedFixes = [];
+  const snapshotReport = writeSnapshot({ activeRows, options, registerDate });
 
   if (options.fix && analysis.uncovered.length > 0) {
     appliedFixes = applySafeFixes(analysis.uncovered, bankData);
@@ -379,6 +650,7 @@ try {
     analysis,
     appliedFixes,
     registerDate,
+    snapshotReport,
   });
 
   if (options.report) {
