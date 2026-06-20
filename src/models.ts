@@ -13,13 +13,20 @@ export type PartMaxLengths = {
   [key in keyof PartsObject]: number;
 };
 
-export type Branches = {
-  [key: string]: [number, number][];
+export type BranchRange = readonly [start: number, end: number];
+
+export type BranchRanges = {
+  readonly [key: string]: readonly BranchRange[];
+};
+
+export type BankAlgorithm = "AB" | "D" | "F" | "X";
+
+export type BankAlgorithms = {
+  readonly [key: string]: BankAlgorithm;
 };
 
 export type BankData = {
-  key: string;
-  branches: Branches;
+  key: BankAlgorithm;
 };
 
 export type BankChecksum = {

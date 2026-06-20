@@ -2,8 +2,9 @@ import {
   partConstants,
   partIndexes,
   partMaxLengths,
-  bankData,
   bankChecksums,
+  BANK_ALGORITHMS,
+  BRANCH_RANGES,
 } from "./constants";
 
 import type { BankChecksum, BankData, PartsObject } from "./models";
@@ -16,6 +17,45 @@ import {
   sumChars,
   getPaddedAccountArray,
 } from "./utils";
+
+type Layout = readonly [id: number, branch: number, base: number, suffix: number];
+
+const UNDELIMITED_LAYOUTS: Readonly<Record<number, Layout>> = {
+  15: [2, 4, 7, 2],
+  16: [2, 4, 7, 3],
+  18: [2, 4, 8, 4],
+};
+
+function splitByLayout(digits: string, layout: Layout): string[] {
+  const [idLength, branchLength, baseLength, suffixLength] = layout;
+
+  const idEnd = idLength;
+  const branchEnd = idEnd + branchLength;
+  const baseEnd = branchEnd + baseLength;
+  const suffixEnd = baseEnd + suffixLength;
+
+  return [
+    digits.slice(0, idEnd),
+    digits.slice(idEnd, branchEnd),
+    digits.slice(branchEnd, baseEnd),
+    digits.slice(baseEnd, suffixEnd),
+  ];
+}
+
+function splitUndelimited(digits: string): string[] {
+  const layout = UNDELIMITED_LAYOUTS[digits.length];
+
+  if (layout) {
+    return splitByLayout(digits, layout);
+  }
+
+  return [
+    digits.slice(0, 2),
+    digits.slice(2, 5),
+    digits.slice(5, 12),
+    digits.slice(12),
+  ].filter(Boolean);
+}
 
 function isPartsObject(obj: unknown = {}): obj is PartsObject {
   if (typeof obj !== "object" || obj === null) return false;
@@ -43,13 +83,8 @@ const bankAccountValidator = {
   splitString(str = ""): string[] {
     const parts = isString(str) ? str.split(/[^0-9]/) : [];
 
-    // If the input string had no delimiters, and its length is
-    // long enough, manually forge an array.
     if (parts.length === 1) {
-      parts[0] = str.slice(0, 2);
-      parts[1] = str.slice(2, 5);
-      parts[2] = str.slice(5, 12);
-      parts[3] = str.slice(12);
+      return splitUndelimited(parts[0]);
     }
 
     return parts.filter((i) => i.length);
@@ -141,17 +176,25 @@ const bankAccountValidator = {
 
   getBankData(id: string, branch: string): BankData | undefined {
     const paddedId = padLeft(id, partMaxLengths.id);
+    const branchNumber = Number(branch);
 
-    return bankData.find((r) => {
-      r.branches;
-      const ranges = r.branches[paddedId];
+    const algorithmKey = BANK_ALGORITHMS[paddedId];
 
-      return ranges && inRanges(parseInt(branch, 10), ranges);
-    });
+    if (!algorithmKey) {
+      return undefined;
+    }
+
+    const ranges = BRANCH_RANGES[paddedId];
+
+    if (!ranges || !inRanges(branchNumber, ranges)) {
+      return undefined;
+    }
+
+    return { key: algorithmKey };
   },
 
   getChecksum(bankData: BankData, base: string): BankChecksum | undefined {
-    let { key } = bankData;
+    let key: string = bankData.key;
 
     if (key === "AB") {
       key = parseInt(base, 10) < 990000 ? "A" : "B";

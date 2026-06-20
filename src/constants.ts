@@ -1,6 +1,7 @@
 import type {
-  BankData,
+  BankAlgorithms,
   BankChecksums,
+  BranchRanges,
   PartsObject,
   PartIndexes,
   PartMaxLengths,
@@ -27,112 +28,118 @@ const partMaxLengths: PartMaxLengths = {
   suffix: 4,
 };
 
-// The ranges used for branches are inclusive
-const bankData: BankData[] = [
-  {
-    key: "AB",
-    branches: {
-      "01": [
-        [1, 999],
-        [1100, 1199],
-        [1800, 1899],
-        [6150, 6150],
-      ],
+// Current IRD Bank ID to checksum algorithm mapping.
+const CURRENT_BANK_ALGORITHMS: BankAlgorithms = {
+  "01": "AB",
+  "02": "AB",
+  "03": "AB",
+  "04": "AB",
+  "05": "AB",
+  "06": "AB",
+  "08": "D",
+  "10": "AB",
+  "11": "AB",
+  "12": "AB",
+  "13": "AB",
+  "14": "AB",
+  "15": "AB",
+  "16": "AB",
+  "17": "AB",
+  "18": "AB",
+  "19": "AB",
+  "20": "AB",
+  "21": "AB",
+  "22": "AB",
+  "23": "AB",
+  "24": "AB",
+  "25": "F",
+  "27": "AB",
+  "30": "AB",
+  "31": "X",
+  "38": "AB",
+  "88": "AB",
+};
 
-      "02": [
-        [1, 999],
-        [1200, 1299],
-        [2025, 2055],
-      ],
+// Retained for compatibility with accounts accepted by earlier releases.
+const LEGACY_BANK_ALGORITHMS: BankAlgorithms = {
+  "35": "AB",
+};
 
-      "03": [
-        [1, 999],
-        [1300, 1399],
-        [1500, 1599],
-        [1700, 1799],
-        [1900, 1999],
-        [7350, 7399],
-      ],
+const BANK_ALGORITHMS: BankAlgorithms = {
+  ...CURRENT_BANK_ALGORITHMS,
+  ...LEGACY_BANK_ALGORITHMS,
+};
 
-      "04": [[2014, 2024]], // Lower bound from https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/
+/**
+ * Broad branch ranges.
+ *
+ * These are intentionally broader than the exact Payments NZ active branch list.
+ * The maintenance goal is that every active Payments NZ branch is covered, not
+ * that every covered branch is currently active.
+ */
+const BRANCH_RANGES: BranchRanges = {
+  "01": [
+    [1, 999],
+    [1100, 1199],
+    [1800, 1899],
+    [6150, 6150],
+  ],
 
-      "05": [[8884, 8889]], // China Construction Bank, see https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/
+  "02": [
+    [1, 999],
+    [1200, 1299],
+    [2025, 2055],
+  ],
 
-      "06": [
-        [1, 999],
-        [1400, 1499],
-      ],
+  "03": [
+    [1, 999],
+    [1300, 1399],
+    [1500, 1599],
+    [1700, 1799],
+    [1900, 1999],
+    [5000, 5099],
+    [7350, 7399],
+  ],
 
-      10: [[5165, 5169]],
+  "04": [[2014, 2024]],
+  "05": [[8884, 8889]],
 
-      11: [
-        [5000, 6499],
-        [6600, 8999],
-      ],
+  "06": [
+    [1, 999],
+    [1400, 1499],
+  ],
 
-      12: [
-        [3000, 3299],
-        [3400, 3499],
-        [3600, 3699],
-      ],
-
-      13: [[4900, 4999]],
-
-      14: [[4700, 4799]],
-
-      15: [[3900, 3999]],
-
-      16: [[4400, 4499]],
-
-      17: [[3300, 3399]],
-
-      18: [[3500, 3599]],
-
-      19: [[4600, 4649]],
-
-      20: [[4100, 4199]],
-
-      21: [[4800, 4899]],
-
-      22: [[4000, 4049]],
-
-      23: [[3700, 3799]],
-
-      24: [[4300, 4349]],
-
-      27: [[3800, 3849]],
-
-      30: [[2900, 2949]],
-
-      35: [[2400, 2499]],
-
-      38: [[9000, 9499]],
-
-      88: [[8800, 8805]], // Bank of China, see https://www.paymentsnz.co.nz/resources/industry-registers/bank-branch-register/
-    },
-  },
-
-  {
-    key: "D",
-    branches: {
-      "08": [[6500, 6599]],
-    },
-  },
-
-  {
-    key: "F",
-    branches: {
-      25: [[2500, 2599]],
-    },
-  },
-
-  {
-    key: "X",
-    branches: {
-      31: [[2800, 2849]],
-    },
-  },
-];
+  "08": [[6500, 6599]],
+  "10": [[5165, 5169]],
+  "11": [
+    [5000, 6499],
+    [6600, 8999],
+  ],
+  "12": [
+    [3000, 3299],
+    [3400, 3499],
+    [3600, 3699],
+  ],
+  "13": [[4900, 4999]],
+  "14": [[4700, 4799]],
+  "15": [[3900, 3999]],
+  "16": [[4400, 4499]],
+  "17": [[3300, 3399]],
+  "18": [[3500, 3599]],
+  "19": [[4600, 4649]],
+  "20": [[4100, 4199]],
+  "21": [[4800, 4899]],
+  "22": [[4000, 4049]],
+  "23": [[3700, 3799]],
+  "24": [[4300, 4349]],
+  "25": [[2500, 2599]],
+  "27": [[3800, 3849]],
+  "30": [[2900, 2949]],
+  "31": [[2800, 2849]],
+  "35": [[2400, 2499]],
+  "38": [[9000, 9499]],
+  "88": [[8800, 8805]],
+};
 
 const bankChecksums: BankChecksums = {
   A: {
@@ -178,4 +185,13 @@ const bankChecksums: BankChecksums = {
   },
 };
 
-export { partConstants, partIndexes, partMaxLengths, bankData, bankChecksums };
+export {
+  partConstants,
+  partIndexes,
+  partMaxLengths,
+  bankChecksums,
+  CURRENT_BANK_ALGORITHMS,
+  LEGACY_BANK_ALGORITHMS,
+  BANK_ALGORITHMS,
+  BRANCH_RANGES,
+};
