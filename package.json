@@ -1,6 +1,6 @@
 {
   "name": "nz-bank-validator",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A small, zero dependency NZ bank account validation library that runs everywhere.",
   "source": "src/index.ts",
   "type": "module",
@@ -15,14 +15,27 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "lint": "eslint ./src/**/*.ts",
-    "build": "microbundle",
+    "build": "microbundle --no-compress --no-sourcemap",
     "watch": "microbundle watch",
     "start": "microbundle watch",
     "test": "jest",
     "verify:bank-data": "node scripts/verify-bank-data.mjs",
     "check:bank-register": "node scripts/check-bank-register.mjs",
     "check:bank-register:fix": "node scripts/check-bank-register.mjs --fix",
-    "pub": "npm run build && npm publish"
+    "prepack": "npm run build",
+    "pack:check": "npm pack --dry-run",
+    "test:package": "node scripts/test-packed-artifact.mjs",
+    "pub": "npm publish"
+  },
+  "files": [
+    "dist/**/*",
+    "!dist/__tests__/**",
+    "!dist/data/**",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
