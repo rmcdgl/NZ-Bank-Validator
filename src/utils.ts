@@ -1,5 +1,7 @@
 import { partMaxLengths } from "./constants";
-import type { PartMaxLengths } from "./models";
+import type { BranchRange, PartsObject } from "./models";
+
+const ORDERED_PART_KEYS = ["id", "branch", "base", "suffix"] as const;
 
 const isString = (x: unknown): x is string => x === x + "";
 
@@ -14,7 +16,7 @@ const inRange = (start: number, value: number, end: number): boolean =>
 
 const inRanges = (
   value: number,
-  ranges: Array<[number, number]> = []
+  ranges: readonly BranchRange[] = []
 ): boolean => {
   return ranges.reduce((bool, range) => {
     const [start, end] = range;
@@ -29,14 +31,10 @@ const sumChars = (int: number): number => {
   }, 0);
 };
 
-const getPaddedAccountArray = (partsObj: Record<string, string>): string[] => {
-  return Object.keys(partsObj).reduce((a, k) => {
-    const key = k as keyof PartMaxLengths;
-    const paddedValue = padLeft(partsObj[k], partMaxLengths[key]);
-    const splitValues = paddedValue.split("");
-
-    return a.concat(splitValues);
-  }, [] as string[]);
+const getPaddedAccountArray = (partsObj: PartsObject): string[] => {
+  return ORDERED_PART_KEYS.flatMap((key) =>
+    padLeft(partsObj[key], partMaxLengths[key]).split("")
+  );
 };
 
 export {
