@@ -19,6 +19,9 @@
     "watch": "microbundle watch",
     "start": "microbundle watch",
     "test": "jest",
+    "verify:bank-data": "node scripts/verify-bank-data.mjs",
+    "check:bank-register": "node scripts/check-bank-register.mjs",
+    "check:bank-register:fix": "node scripts/check-bank-register.mjs --fix",
     "pub": "npm run build && npm publish"
   },
   "devDependencies": {
