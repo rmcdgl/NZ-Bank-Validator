@@ -1,4 +1,7 @@
-import bankAccountValidator from "..";
+import { strict as assert } from "node:assert";
+import test from "node:test";
+
+import bankAccountValidator from "../index";
 
 type ValidatorInput = Parameters<typeof bankAccountValidator.validate>[0];
 
@@ -51,39 +54,41 @@ const validateTests: [string, unknown, boolean][] = [
 
 validateTests.forEach(([label, input, result]) => {
   test(label, () => {
-    expect(bankAccountValidator.validate(input as ValidatorInput)).toBe(result);
+    assert.equal(bankAccountValidator.validate(input as ValidatorInput), result);
   });
 });
 
 test("object key order does not affect validation", () => {
-  expect(
+  assert.equal(
     bankAccountValidator.validate({
       id: "01",
       branch: "902",
       base: "0068389",
       suffix: "00",
-    })
-  ).toBe(true);
+    }),
+    true
+  );
 
-  expect(
+  assert.equal(
     bankAccountValidator.validate({
       suffix: "00",
       base: "0068389",
       branch: "902",
       id: "01",
-    })
-  ).toBe(true);
+    }),
+    true
+  );
 });
 
 test("branch examples are covered by broad ranges", () => {
-  expect(bankAccountValidator.getBankData("03", "5050")).toBeDefined();
-  expect(bankAccountValidator.getBankData("38", "9000")).toBeDefined();
-  expect(bankAccountValidator.getBankData("08", "6523")).toBeDefined();
+  assert.ok(bankAccountValidator.getBankData("03", "5050"));
+  assert.ok(bankAccountValidator.getBankData("38", "9000"));
+  assert.ok(bankAccountValidator.getBankData("08", "6523"));
 });
 
 test("public parser helpers keep existing output", () => {
-  expect(bankAccountValidator.getBranch("01-902-0068389-00")).toBe("902");
-  expect(bankAccountValidator.splitString("01902006838900")).toEqual([
+  assert.equal(bankAccountValidator.getBranch("01-902-0068389-00"), "902");
+  assert.deepEqual(bankAccountValidator.splitString("01902006838900"), [
     "01",
     "902",
     "0068389",

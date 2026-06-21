@@ -9,16 +9,18 @@
   "module": "dist/index.mjs",
   "exports": {
     "types": "./dist/index.d.ts",
+    "import": "./dist/index.mjs",
     "require": "./dist/index.cjs",
-    "default": "./dist/index.modern.mjs"
+    "default": "./dist/index.mjs"
   },
   "types": "dist/index.d.ts",
   "scripts": {
-    "lint": "eslint ./src/**/*.ts",
-    "build": "microbundle --no-compress --no-sourcemap",
-    "watch": "microbundle watch",
-    "start": "microbundle watch",
-    "test": "jest",
+    "lint": "eslint \"src/**/*.ts\"",
+    "build": "tsdown --config-loader tsx",
+    "watch": "tsdown --config-loader tsx --watch",
+    "start": "tsdown --config-loader tsx --watch",
+    "test": "node --import tsx --test src/__tests__/validate.ts",
+    "typecheck": "tsc --noEmit --project tsconfig.json && tsc --noEmit --project tsconfig.eslint.json && tsc --noEmit --project src/__tests__/tsconfig.json",
     "verify:bank-data": "node scripts/verify-bank-data.mjs",
     "check:bank-register": "node scripts/check-bank-register.mjs",
     "check:bank-register:fix": "node scripts/check-bank-register.mjs --fix",
@@ -38,19 +40,13 @@
     "access": "public"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.1",
-    "@typescript-eslint/eslint-plugin": "^5.59.2",
-    "@typescript-eslint/parser": "^5.59.2",
-    "eslint": "^8.40.0",
-    "eslint-plugin-import": "^2.27.5",
-    "jest": "^29.5.0",
-    "microbundle": "^0.15.1",
-    "prettier": "^2.8.8",
-    "ts-jest": "^29.1.0",
-    "typescript": "^5.0.4"
-  },
-  "eslintConfig": {
-    "extends": "./eslint.config.cjs"
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.0.0",
+    "eslint": "^10.5.0",
+    "tsdown": "^0.22.3",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.1"
   },
   "repository": {
     "type": "git",
