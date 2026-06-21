@@ -1,11 +1,19 @@
-module.exports = {
-  parser: "@typescript-eslint/parser",
-  extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
-  plugins: ["@typescript-eslint"],
-  parserOptions: {
-    ecmaVersion: 2021,
-    sourceType: "module",
-    project: "./tsconfig.eslint.json",
+const eslint = require("@eslint/js");
+const tseslint = require("typescript-eslint");
+
+module.exports = tseslint.config(
+  {
+    ignores: ["dist/**", "node_modules/**"],
   },
-  rules: {},
-};
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    files: ["src/**/*.ts"],
+    languageOptions: {
+      parserOptions: {
+        project: "./tsconfig.eslint.json",
+        tsconfigRootDir: __dirname,
+      },
+    },
+  }
+);

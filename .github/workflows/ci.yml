@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        node: [20, 22, 24]
+        node: [22, 24]
 
     steps:
       - uses: actions/checkout@v6
@@ -28,6 +28,7 @@ jobs:
       - run: npm ci
       - run: npm run verify:bank-data
       - run: npm run lint
+      - run: npm run typecheck
       - run: npm test
       - run: npm run build
       - run: npm run pack:check
