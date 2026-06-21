@@ -32,9 +32,17 @@ const sumChars = (int: number): number => {
 };
 
 const getPaddedAccountArray = (partsObj: PartsObject): string[] => {
-  return ORDERED_PART_KEYS.flatMap((key) =>
-    padLeft(partsObj[key], partMaxLengths[key]).split("")
-  );
+  const result: string[] = [];
+
+  ORDERED_PART_KEYS.forEach((key) => {
+    padLeft(partsObj[key], partMaxLengths[key])
+      .split("")
+      .forEach((character) => {
+        result.push(character);
+      });
+  });
+
+  return result;
 };
 
 export {

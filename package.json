@@ -8,10 +8,17 @@
   "umd:main": "dist/index.umd.js",
   "module": "dist/index.mjs",
   "exports": {
-    "types": "./dist/index.d.ts",
-    "import": "./dist/index.mjs",
-    "require": "./dist/index.cjs",
-    "default": "./dist/index.mjs"
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
+      "default": "./dist/index.mjs"
+    }
   },
   "types": "dist/index.d.ts",
   "scripts": {
@@ -41,7 +48,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^26.0.0",
+    "@types/node": "^22.0.0",
     "eslint": "^10.5.0",
     "tsdown": "^0.22.3",
     "tsx": "^4.22.4",

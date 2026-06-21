@@ -7,6 +7,7 @@ import { join, resolve } from "node:path";
 const root = resolve(".");
 const packDirectory = mkdtempSync(join(tmpdir(), "nz-bank-validator-pack-"));
 const consumerDirectory = mkdtempSync(join(tmpdir(), "nz-bank-validator-consumer-"));
+const typescriptBin = resolve(root, "node_modules/typescript/bin/tsc");
 
 execFileSync("npm", ["run", "build"], { cwd: root, stdio: "inherit" });
 
@@ -48,5 +49,49 @@ writeFileSync(
 
 execFileSync("node", ["cjs.cjs"], { cwd: consumerDirectory, stdio: "inherit" });
 execFileSync("node", ["esm.mjs"], { cwd: consumerDirectory, stdio: "inherit" });
+
+writeFileSync(
+  join(consumerDirectory, "tsconfig.json"),
+  JSON.stringify(
+    {
+      compilerOptions: {
+        esModuleInterop: true,
+        module: "NodeNext",
+        moduleResolution: "NodeNext",
+        skipLibCheck: false,
+        strict: true,
+        target: "ES2022",
+      },
+      include: ["*.ts", "*.cts"],
+    },
+    null,
+    2
+  )
+);
+
+writeFileSync(
+  join(consumerDirectory, "esm.ts"),
+  [
+    'import validator from "nz-bank-validator";',
+    'const isValid: boolean = validator.validate("01-902-0068389-00");',
+    "void isValid;",
+    "",
+  ].join("\n")
+);
+
+writeFileSync(
+  join(consumerDirectory, "cjs.cts"),
+  [
+    'import validator = require("nz-bank-validator");',
+    'const isValid: boolean = validator.validate("01-902-0068389-00");',
+    "void isValid;",
+    "",
+  ].join("\n")
+);
+
+execFileSync("node", [typescriptBin, "--noEmit", "--project", "tsconfig.json"], {
+  cwd: consumerDirectory,
+  stdio: "inherit",
+});
 
 console.log(`Packed artifact verified: ${filename}`);

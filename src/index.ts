@@ -61,7 +61,7 @@ function isPartsObject(obj: unknown = {}): obj is PartsObject {
   if (typeof obj !== "object" || obj === null) return false;
   const inputsKeys = Object.keys(obj);
   const requiredKeys = Object.keys(partConstants);
-  const filteredKeys = requiredKeys.filter((k) => inputsKeys.includes(k));
+  const filteredKeys = requiredKeys.filter((k) => inputsKeys.indexOf(k) !== -1);
 
   return requiredKeys.length === filteredKeys.length;
 }
