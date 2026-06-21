@@ -7,7 +7,7 @@ export default defineConfig({
   dts: true,
   minify: false,
   sourcemap: false,
-  target: "es2018",
+  target: "es2015",
   outExtensions({ format }) {
     if (format === "cjs") {
       return { js: ".cjs", dts: ".d.cts" };
