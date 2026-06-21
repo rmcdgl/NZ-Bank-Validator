@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   test:
+    name: Node.js ${{ matrix.node }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -31,3 +32,16 @@ jobs:
       - run: npm run build
       - run: npm run pack:check
       - run: npm run test:package
+
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: ${{ always() }}
+
+    steps:
+      - name: Check matrix result
+        run: |
+          if [ "${{ needs.test.result }}" != "success" ]; then
+            exit 1
+          fi
