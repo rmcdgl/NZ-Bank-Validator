@@ -1,6 +1,6 @@
 # Payments NZ Bank Branch Register
 # Register date: 25 June 2026
-# Retrieved at: 2026-06-26T04:20:58.958Z
+# Retrieved at: 2026-06-26T21:07:58.840Z
 # Active branches: 3296
 01-0001
 01-0004
