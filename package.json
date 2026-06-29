@@ -23,9 +23,9 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "lint": "eslint \"src/**/*.ts\"",
-    "build": "tsdown --config-loader tsx",
-    "watch": "tsdown --config-loader tsx --watch",
-    "start": "tsdown --config-loader tsx --watch",
+    "build": "tsdown --config-loader native",
+    "watch": "tsdown --config-loader native --watch",
+    "start": "tsdown --config-loader native --watch",
     "test": "node --import tsx --test src/__tests__/validate.ts",
     "typecheck": "tsc --noEmit --project tsconfig.json && tsc --noEmit --project tsconfig.eslint.json && tsc --noEmit --project src/__tests__/tsconfig.json",
     "verify:bank-data": "node scripts/verify-bank-data.mjs",
