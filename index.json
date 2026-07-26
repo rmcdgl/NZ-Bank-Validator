@@ -1,15 +1,20 @@
 {
-  "updatedAt": "2026-06-26T21:07:58.842Z",
+  "updatedAt": "2026-07-26T20:55:39.505Z",
   "latest": {
     "activeBranches": 3296,
-    "file": "snapshots/2026-06-25.txt",
-    "registerDate": "2026-06-25"
+    "file": "snapshots/2026-07-24.txt",
+    "registerDate": "2026-07-24"
   },
   "snapshots": [
     {
       "activeBranches": 3296,
       "file": "snapshots/2026-06-25.txt",
       "registerDate": "2026-06-25"
+    },
+    {
+      "activeBranches": 3296,
+      "file": "snapshots/2026-07-24.txt",
+      "registerDate": "2026-07-24"
     }
   ]
 }
